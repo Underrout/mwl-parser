@@ -32,3 +32,20 @@ uint32_t MWLParser::join4Bytes(const std::vector<uint8_t>::const_iterator first_
 {
 	return static_cast<uint32_t>(MWLParser::joinBytes(first_byte, 4));
 }
+
+std::vector<uint8_t> MWLParser::strToBytes(const std::string& s)
+{
+	return std::vector<uint8_t>(s.begin(), s.end());
+}
+
+std::vector<uint8_t> MWLParser::splitInto4Bytes(uint32_t four_bytes)
+{
+	std::vector<uint8_t> bytes{};
+
+	for (size_t i = 0; i != 4; ++i)
+	{
+		bytes.push_back((four_bytes >> (i * 8)) & 0xFF);
+	}
+
+	return bytes;
+}

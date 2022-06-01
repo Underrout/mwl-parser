@@ -2,27 +2,25 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "StaticMWLOffsets.h"
 #include "ByteUtility.h"
+#include "Convertible.h"
+#include "MWLConstants.h"
 
 namespace MWLParser 
 {
-	class Header
+	struct Header : public virtual Convertible
 	{
-	private:
-		const std::string lunar_magic_version;
-		const std::string comment_field;
+		std::string lunar_magic_version;
+		std::string comment_field;
+		bool exported_from_sma2;
 
-		const std::string getString(
-			const std::vector<uint8_t>::const_iterator string_start, 
-			const std::vector<uint8_t>::const_iterator string_end
-		);
-
-	public:
 		Header(const std::vector<uint8_t>& mwl_bytes);
+		Header(const std::string& lunar_magic_version, const std::string& comment_field, bool exported_from_sma2);
 
-		const std::string& getLunarMagicVersion();
-		const std::string& getCommentField();
+		std::shared_ptr<Convertible> fromBytes(const std::vector<uint8_t>& bytes);
+		std::vector<uint8_t> toBytes() const;
 	};
 }

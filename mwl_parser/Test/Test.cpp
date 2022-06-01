@@ -64,7 +64,7 @@ int main()
     const std::vector<uint8_t> mwl_bytes = readFile("test_mwls\\level 105.mwl");
 
     Header header = Header(mwl_bytes);
-    std::cout << header.getLunarMagicVersion() << std::endl << header.getCommentField() << std::endl;
+    std::cout << header.lunar_magic_version << std::endl << header.lunar_magic_version << std::endl;
 
     DataPointers data_pointers = DataPointers(mwl_bytes);
 
@@ -76,6 +76,9 @@ int main()
     showRange("Secondary Entrances", data_pointers.getSecondaryEntrancesIterators());
     showRange("ExAnimation", data_pointers.getExAnimationIterators());
     showRange("Bypass Information", data_pointers.getBypassInformationIterators());
+
+    const auto header_bytes = header.toBytes();
+    showRange("Re-converted", std::make_pair(header_bytes.begin(), header_bytes.end()));
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
