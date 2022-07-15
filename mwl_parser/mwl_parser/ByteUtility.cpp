@@ -38,13 +38,13 @@ std::vector<uint8_t> MWLParser::strToBytes(const std::string& s)
 	return std::vector<uint8_t>(s.begin(), s.end());
 }
 
-std::vector<uint8_t> MWLParser::splitInto4Bytes(uint32_t four_bytes)
+std::vector<uint8_t> MWLParser::splitIntoBytes(size_t number, size_t byte_amount)
 {
 	std::vector<uint8_t> bytes{};
 
-	for (size_t i = 0; i != 4; ++i)
+	for (size_t i = 0; i != byte_amount; ++i)
 	{
-		bytes.push_back((four_bytes >> (i * 8)) & 0xFF);
+		bytes.push_back((number >> (i * 8)) & 0xFF);
 	}
 
 	return bytes;

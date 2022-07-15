@@ -56,12 +56,12 @@ std::vector<uint8_t> Header::toBytes() const
 
 	// data pointer table offset + size
 
-	const auto offset = splitInto4Bytes(
-		Offsets::Header::COMMENT_FIELD_START + comment_field.size());
+	const auto offset = splitIntoBytes(
+		Offsets::Header::COMMENT_FIELD_START + comment_field.size(), 4);
 	bytes.insert(bytes.end(), offset.begin(), offset.end());
 
-	const auto size = splitInto4Bytes(
-		Constants::Header::DATA_POINTER_TABLE_SIZE);
+	const auto size = splitIntoBytes(
+		Constants::Header::DATA_POINTER_TABLE_SIZE, 4);
 	bytes.insert(bytes.end(), size.begin(), size.end());
 
 	// special flags
