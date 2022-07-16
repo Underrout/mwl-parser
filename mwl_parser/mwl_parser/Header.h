@@ -17,6 +17,7 @@ namespace MWLParser
 		std::string comment_field;
 		bool exported_from_sma2;
 
+		Header() = default;
 		Header(const std::vector<uint8_t>& mwl_bytes);
 		Header(const std::string& lunar_magic_version, const std::string& comment_field, bool exported_from_sma2);
 

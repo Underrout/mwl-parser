@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BypassInformation.h" />
     <ClInclude Include="ByteUtility.h" />
     <ClInclude Include="Convertible.h" />
     <ClInclude Include="DataPointers.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="StaticMWLOffsets.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BypassInformation.cpp" />
     <ClCompile Include="ByteUtility.cpp" />
     <ClCompile Include="DataPointers.cpp" />
     <ClCompile Include="Header.cpp" />
