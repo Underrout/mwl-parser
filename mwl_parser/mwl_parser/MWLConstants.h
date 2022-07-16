@@ -132,6 +132,9 @@ namespace MWLParser
 
 			constexpr size_t EXGFX_NUMBER_SIZE = 2;
 			constexpr size_t EXGFX_SLOT_AMOUNT = 16;
+
+			// from -0x400 to 0x3FF
+			constexpr size_t LAYER_3_Y_POSITION_RANGE = 0x800;
 		}
 	}
 }

@@ -34,7 +34,7 @@ namespace MWLParser
 		Layer3FileSizeSetting layer_3_file_size_setting;
 		Layer3ActAsSetting layer_3_act_as_setting;
 		Layer3InitialXPosition layer_3_initial_x_position;
-		size_t layer_3_initial_y_position;
+		int16_t layer_3_initial_y_position;
 		Layer3HorizontalScrollSetting layer_3_horizontal_scroll_setting;
 		Layer3VerticalScrollSetting layer_3_vertical_scroll_setting;
 
