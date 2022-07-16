@@ -14,7 +14,7 @@ BypassInformation::BypassInformation(const std::vector<uint8_t>& mwl_bytes)
 		exgfx_files.insert(std::make_pair(exgfx_slot, number & ((1 << (4 + (EXGFX_NUMBER_SIZE - 1) * 8)) - 1)));
 		curr_number_start += EXGFX_NUMBER_SIZE;
 
-		auto high_byte = number >> (8 * (EXGFX_NUMBER_SIZE - 1));
+		uint8_t high_byte = number >> (8 * (EXGFX_NUMBER_SIZE - 1));
 		switch (exgfx_slot)
 		{
 			case ExGFXSlot::AN2:
@@ -37,7 +37,7 @@ BypassInformation::BypassInformation(const std::vector<uint8_t>& mwl_bytes)
 				break;
 
 			case ExGFXSlot::SP2:
-				layer_3_initial_y_position += (high_byte & 0b11000000) << 3;
+				layer_3_initial_y_position += (high_byte & 0b11110000) << 5;
 				break;
 
 			case ExGFXSlot::SP1:
@@ -54,7 +54,7 @@ BypassInformation::BypassInformation(const std::vector<uint8_t>& mwl_bytes)
 				break;
 
 			case ExGFXSlot::LG3:
-				layer_3_initial_y_position += (high_byte & 0b11110000) >> 4;
+				layer_3_initial_y_position += (high_byte & 0b11110000) >> 3;
 				break;
 
 			case ExGFXSlot::LG2:
