@@ -29,11 +29,6 @@ PaletteData::PaletteData(const std::vector<size_t>& palette, size_t background_c
 	this->background_color = background_color;
 }
 
-std::shared_ptr<Convertible> PaletteData::fromBytes(const std::vector<uint8_t>& bytes)
-{
-	return std::make_shared<PaletteData>(bytes);
-}
-
 std::vector<uint8_t> PaletteData::toBytes() const
 {
 	// zeroing out the header since it's unused, at least for our purposes

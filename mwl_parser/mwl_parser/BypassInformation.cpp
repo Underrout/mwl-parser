@@ -72,11 +72,6 @@ BypassInformation::BypassInformation(const std::vector<uint8_t>& mwl_bytes)
 	layer_3_initial_y_position = temp_initial_y < LAYER_3_Y_POSITION_RANGE / 2 ? temp_initial_y : -((temp_initial_y ^ (static_cast<signed long long>(LAYER_3_Y_POSITION_RANGE) - 1)) + 1);
 }
 
-std::shared_ptr<Convertible> BypassInformation::fromBytes(const std::vector<uint8_t>& bytes)
-{
-	return std::make_shared<BypassInformation>(bytes);
-}
-
 std::vector<uint8_t> BypassInformation::toBytes() const
 {
 	std::vector<uint8_t> bytes{};

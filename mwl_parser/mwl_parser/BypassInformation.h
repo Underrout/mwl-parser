@@ -41,7 +41,6 @@ namespace MWLParser
 		BypassInformation() = default;
 		BypassInformation(const std::vector<uint8_t>& mwl_bytes);
 
-		std::shared_ptr<Convertible> fromBytes(const std::vector<uint8_t>& bytes);
 		std::vector<uint8_t> toBytes() const;
 	};
 }

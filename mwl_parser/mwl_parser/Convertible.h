@@ -10,7 +10,7 @@ namespace MWLParser
 	public:
 		virtual ~Convertible() {};
 
-		virtual std::shared_ptr<Convertible> fromBytes(const std::vector<uint8_t>& bytes) = 0;
 		virtual std::vector<uint8_t> toBytes() const = 0;
 	};
 }
+

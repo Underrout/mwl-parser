@@ -112,6 +112,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -139,10 +140,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="BypassInformation.h" />
     <ClInclude Include="ByteUtility.h" />
     <ClInclude Include="Convertible.h" />
     <ClInclude Include="DataPointers.h" />
+    <ClInclude Include="ExAnimationData.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Level.h" />
@@ -154,9 +157,11 @@
     <ClInclude Include="StaticMWLOffsets.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BypassInformation.cpp" />
     <ClCompile Include="ByteUtility.cpp" />
     <ClCompile Include="DataPointers.cpp" />
+    <ClCompile Include="ExAnimationData.cpp" />
     <ClCompile Include="Header.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="LevelInformation.cpp" />

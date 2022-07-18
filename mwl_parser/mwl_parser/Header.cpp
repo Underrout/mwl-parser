@@ -33,11 +33,6 @@ Header::Header(const std::string& lunar_magic_version, const std::string& commen
 	this->exported_from_sma2 = exported_from_sma2;
 }
 
-std::shared_ptr<Convertible> Header::fromBytes(const std::vector<uint8_t>& bytes)
-{
-	return std::make_shared<Header>(bytes);
-}
-
 std::vector<uint8_t> Header::toBytes() const
 {
 	std::vector<uint8_t> bytes{};
