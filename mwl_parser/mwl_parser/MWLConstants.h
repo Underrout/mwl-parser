@@ -2,6 +2,7 @@
 
 #include <string>
 #include "StaticMWLOffsets.h"
+#include <array>
 
 namespace MWLParser
 {
@@ -314,6 +315,48 @@ namespace MWLParser
 				OneShot1F
 			};
 
+			constexpr std::array DOUBLE_FRAME_TRIGGERS
+			{
+				Trigger::POW,
+				Trigger::SilverPOW,
+				Trigger::ON_OFF,
+				Trigger::HaveStar,
+				Trigger::Timer_100,
+				Trigger::_5_YoshiCoins,
+				Trigger::DoNotUse0,
+				Trigger::DoNotUse1,
+				Trigger::DoNotUse2,
+				Trigger::DoNotUse3,
+				Trigger::DoNotUse4,
+				Trigger::DoNotUse5,
+				Trigger::Custom0,
+				Trigger::Custom1,
+				Trigger::Custom2,
+				Trigger::Custom3,
+				Trigger::Custom4,
+				Trigger::Custom5,
+				Trigger::Custom6,
+				Trigger::Custom7,
+				Trigger::Custom8,
+				Trigger::Custom9,
+				Trigger::CustomA,
+				Trigger::CustomB,
+				Trigger::CustomC,
+				Trigger::CustomD,
+				Trigger::CustomE,
+				Trigger::CustomF
+			};
+
+			constexpr std::array NO_FRAMES_TYPES
+			{
+				AnimationType::PaletteRotateRight,
+				AnimationType::PaletteRotateRight_RevOnTrigger,
+				AnimationType::PaletteRotateLeft,
+				AnimationType::PaletteRotateLeft_RevOnTrigger
+			};
+
+			constexpr std::array PALETTE_ROTATE_TYPES = NO_FRAMES_TYPES;
+
 			constexpr size_t INDIVIDUAL_ANIMATION_START_OFFSET = 0;
 
 			constexpr size_t INDIVIDUAL_ANIMATION_TYPE_OFFSET = 
@@ -332,13 +375,13 @@ namespace MWLParser
 				INDIVIDUAL_ANIMATION_FRAME_AMOUNT_OFFSET + INDIVIDUAL_ANIMATION_FRAME_AMOUNT_SIZE;
 			constexpr size_t INDIVIDUAL_ANIMATION_TILE_DESTINATION_SIZE = 2;
 
-			constexpr size_t INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_OFFSET =
-				INDIVIDUAL_ANIMATION_TILE_DESTINATION_OFFSET + INDIVIDUAL_ANIMATION_TILE_DESTINATION_SIZE;
-			constexpr size_t INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_SIZE = 1;
-
 			constexpr size_t INDIVIDUAL_ANIMATION_PALETTE_DESTINATION_OFFSET =
-				INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_OFFSET + INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_SIZE;
+				INDIVIDUAL_ANIMATION_FRAME_AMOUNT_OFFSET + INDIVIDUAL_ANIMATION_FRAME_AMOUNT_SIZE;
 			constexpr size_t INDIVIDUAL_ANIMATION_PALETTE_DESTINATION_SIZE = 1;
+
+			constexpr size_t INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_OFFSET =
+				INDIVIDUAL_ANIMATION_PALETTE_DESTINATION_OFFSET + INDIVIDUAL_ANIMATION_PALETTE_DESTINATION_SIZE;
+			constexpr size_t INDIVIDUAL_ANIMATION_AMOUNT_OF_COLORS_SIZE = 1;
 
 			constexpr size_t INDIVIDUAL_ANIMATION_FRAME_ARRAY_OFFSET =
 				INDIVIDUAL_ANIMATION_TILE_DESTINATION_OFFSET + INDIVIDUAL_ANIMATION_TILE_DESTINATION_SIZE;

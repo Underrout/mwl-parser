@@ -12,14 +12,11 @@ namespace MWLParser
 	struct Animation : public virtual Convertible
 	{
 	protected:
-		size_t amount_of_frames;
-		size_t vram_destination;
-		bool uses_alt_gfx;
-
+		std::vector<uint8_t> commonToBytes() const;
 	public:
 		AnimationType animation_type;
 		Trigger trigger;
-		std::vector<size_t> frames{};
+		size_t vram_destination;
 
 		Animation(const std::vector<uint8_t>& mwl_bytes);
 
@@ -27,22 +24,41 @@ namespace MWLParser
 		static AnimationType getAnimationType(const std::vector<uint8_t>& mwl_bytes);
 	};
 
-	struct TileAnimation : public virtual Animation
+	struct FrameAnimation : public virtual Animation
 	{
+	protected:
+		std::vector<uint8_t> commonToBytes() const;
+
+	public:
+		std::vector<size_t> frames{};
+
+		FrameAnimation(const std::vector<uint8_t>& mwl_bytes);
+	};
+
+	struct PaletteRotateAnimation : public virtual Animation
+	{
+		size_t delay;
+		size_t color_amount;
+		size_t palette_destination;
+
+		PaletteRotateAnimation(const std::vector<uint8_t>& mwl_bytes);
+
+		std::vector<uint8_t> toBytes() const;
+	};
+
+	struct TileAnimation : public virtual FrameAnimation
+	{
+		bool uses_alt_gfx;
 		size_t tile_destination;
 		std::vector<size_t> tile_frames{};
 
 		TileAnimation(const std::vector<uint8_t>& mwl_bytes);
 
-	private:
-		static size_t frameToTileNumber(size_t frame_value);
-		static size_t tileNumberToFrame(size_t tile_number);
-
 	public:
 		std::vector<uint8_t> toBytes() const;
 	};
 
-	struct ColorAnimation : public virtual Animation
+	struct ColorAnimation : public virtual FrameAnimation
 	{
 		size_t color_amount;
 		size_t palette_destination;

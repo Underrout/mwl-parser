@@ -16,7 +16,11 @@ namespace MWLParser
 	std::vector<uint8_t> subVec(const std::vector<uint8_t>& vec, size_t start);
 	std::vector<uint8_t> subVec(const std::vector<uint8_t>& vec, size_t start, size_t end);
 
-	std::vector<uint8_t> subVec(const std::vector<uint8_t>::const_iterator start, const std::vector<uint8_t>::const_iterator end);
+	std::vector<uint8_t> subVec(const typename std::vector<uint8_t>::const_iterator start, const typename std::vector<uint8_t>::const_iterator end);
 
-	std::vector<uint8_t> subVec(const std::pair<std::vector<uint8_t>::const_iterator, std::vector<uint8_t>::const_iterator> start_end_pair);
+	std::vector<uint8_t> subVec(std::pair<const std::vector<uint8_t>::const_iterator, const std::vector<uint8_t>::const_iterator> start_end_pair);
+
+	void extendVecAt(std::vector<uint8_t>& vec, const std::vector<uint8_t>& bytes, const size_t idx);
+
+	void extendVec(std::vector<uint8_t>& vec, const std::vector<uint8_t>& bytes);
 }

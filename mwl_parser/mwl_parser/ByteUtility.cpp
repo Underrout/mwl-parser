@@ -77,7 +77,18 @@ std::vector<uint8_t> MWLParser::subVec(const std::vector<uint8_t>::const_iterato
 	return new_vec;
 }
 
-std::vector<uint8_t> MWLParser::subVec(const std::pair<std::vector<uint8_t>::const_iterator, std::vector<uint8_t>::const_iterator> start_end_pair)
+std::vector<uint8_t> MWLParser::subVec(std::pair<const std::vector<uint8_t>::const_iterator, const std::vector<uint8_t>::const_iterator> start_end_pair)
 {
 	return subVec(start_end_pair.first, start_end_pair.second);
+}
+
+void MWLParser::extendVecAt(std::vector<uint8_t>& vec, const std::vector<uint8_t>& bytes, const size_t idx)
+{
+	vec.reserve(vec.size() + distance(bytes.begin(), bytes.end()));
+	vec.insert(vec.begin() + idx, bytes.begin(), bytes.end());
+}
+
+void MWLParser::extendVec(std::vector<uint8_t>& vec, const std::vector<uint8_t>& bytes)
+{
+	return extendVecAt(vec, bytes, vec.size());
 }

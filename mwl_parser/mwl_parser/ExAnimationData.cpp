@@ -112,5 +112,93 @@ ExAnimationData::ExAnimationData(const std::vector<uint8_t>& mwl_bytes)
 
 std::vector<uint8_t> ExAnimationData::toBytes() const
 {
-	return std::vector<uint8_t>();
+	uint8_t first_header_byte = (!enable_original_games_global_tile_animations << 6) |
+		(!enable_original_games_palette_animations << 7) |
+		(!enable_lunar_magics_global_animations << 5) |
+		(!enable_lunar_magics_level_animations << 4);
+
+	std::vector<uint8_t> bytes{ first_header_byte };
+
+	// zero out rest of the header, which is supposedly unused
+	bytes.insert(bytes.end(),
+		ANIMATION_HEADER_SIZE - ANIMATION_SETTINGS_SIZE, 0);
+
+	const auto max_slot_plus_one = 
+		animation_slots.empty() ? 0 : animation_slots.rbegin()->first + 1;
+
+	extendVec(bytes, splitIntoBytes(max_slot_plus_one,
+		GENERAL_ANIMATION_HIGHEST_USED_SLOT_SIZE));
+
+	extendVec(bytes, splitIntoBytes(static_cast<size_t>(alternate_gfx_file),
+		GENERAL_ANIMATION_ALTERNATE_GFX_FILE_SIZE));
+
+	size_t uninitialized_custom_triggers = 0;
+	size_t initial_custom_trigger_states = 0;
+	size_t i = 0;
+	for (const auto setting : custom_trigger_initialization_settings)
+	{
+		if (setting == CustomTriggerInitState::NotInitialized)
+		{
+			uninitialized_custom_triggers |= 1 << i;
+		}
+		else
+		{
+			if (setting == CustomTriggerInitState::Off)
+			{
+				initial_custom_trigger_states |= 1 << i;
+			}
+		}
+		++i;
+	}
+
+	extendVec(bytes, splitIntoBytes(uninitialized_custom_triggers,
+		GENERAL_ANIMATION_CUSTOM_TRIGGER_INIT_SIZE));
+
+	extendVec(bytes, splitIntoBytes(initial_custom_trigger_states,
+		GENERAL_ANIMATION_CUSTOM_TRIGGER_INIT_STATES_SIZE));
+
+	size_t initialized_manual_triggers = 0;
+	i = 0;
+	for (const auto setting : manual_trigger_initialization_settings)
+	{
+		if (setting.has_value())
+		{
+			initialized_manual_triggers |= 1 << i;
+			extendVec(bytes, splitIntoBytes(setting.value(),
+				GENERAL_ANIMATION_MANUAL_TRIGGER_INIT_STATES_SIZE));
+		}
+		++i;
+	}
+
+	extendVecAt(bytes, splitIntoBytes(initialized_manual_triggers,
+		GENERAL_ANIMATION_MANUAL_TRIGGER_INIT_SIZE),
+		GENERAL_ANIMATION_MANUAL_TRIGGER_INIT_OFFSET);
+
+	size_t indice_list_offset = bytes.size();
+	size_t individual_animation_data_offset = indice_list_offset +
+		max_slot_plus_one * GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE;
+
+	for (size_t i = 0; i != max_slot_plus_one; ++i)
+	{
+		const auto slot = animation_slots.find(i);
+
+		if (slot != animation_slots.end())
+		{
+			const auto size_of_previous_slots = bytes.size() - 
+				indice_list_offset - i * GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE;
+			const auto idx = individual_animation_data_offset - indice_list_offset + size_of_previous_slots;
+			extendVec(bytes, slot->second->toBytes());
+			extendVecAt(bytes, splitIntoBytes(idx,
+				GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE),
+				indice_list_offset + i * GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE);
+		}
+		else
+		{
+			extendVecAt(bytes, splitIntoBytes(0,
+				GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE),
+				indice_list_offset + i * GENERAL_ANIMATION_INDICE_LIST_ENTRY_SIZE);
+		}
+	}
+
+	return bytes;
 }
