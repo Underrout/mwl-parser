@@ -1,93 +1,199 @@
-// Test.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+#include "pch.h"
 
+#include <string>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <array>
+#include <sstream>
+#include "fmt/color.h"
 
-#include "../mwl_parser/Header.h"
-#include "../mwl_parser/DataPointers.h"
+#include "../mwl_parser/Level.h"
+#include "../mwl_parser/MWLConstants.h"
 
-using MWLParser::Header;
-using MWLParser::DataPointers;
+using namespace MWLParser::Constants;
 
-std::vector<uint8_t> readFile(const char* filename)
+#define TEST_MWL_DIR GetDirectoryName(__FILE__)
+
+namespace Test
 {
-    // open the file:
-    std::ifstream file(filename, std::ios::binary);
-
-    // Stop eating new lines in binary mode!!!
-    file.unsetf(std::ios::skipws);
-
-    // get its size:
-    std::streampos fileSize;
-
-    file.seekg(0, std::ios::end);
-    fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    // reserve capacity
-    std::vector<uint8_t> vec;
-    vec.reserve(fileSize);
-
-    // read the data:
-    vec.insert(vec.begin(),
-        std::istream_iterator<uint8_t>(file),
-        std::istream_iterator<uint8_t>());
-
-    return vec;
-}
-
-void showRange(const std::string data_area_name, MWLParser::DataIteratorPair pair)
-{
-    std::cout << std::endl << std::endl << "===============================================" << std::endl << std::endl
-        << "> " << data_area_name << std::endl << std::endl;
-    size_t i = 0;
-    while (pair.first != pair.second)
+    std::array test_mwls
     {
-        std::cout << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << unsigned(*pair.first++) << ' ';
-        if (pair.first != pair.second && i == 15)
+        "test_mwls\\original\\level 105.mwl",
+        "test_mwls\\custom\\0.mwl"
+    };
+
+    std::string GetDirectoryName(std::string path) {
+        const size_t last_slash = path.rfind('\\');
+
+        if (last_slash != std::string::npos)
         {
-            i = 0;
-            std::cout << std::endl;
+            return path.substr(0, last_slash + 1);
         }
-        else
+        return "";
+    }
+
+    std::vector<uint8_t> readFile(const char* filename)
+    {
+        // open the file:
+        std::ifstream file(filename, std::ios::binary);
+
+        // Stop eating new lines in binary mode!!!
+        file.unsetf(std::ios::skipws);
+
+        // get its size:
+        std::streampos fileSize;
+
+        file.seekg(0, std::ios::end);
+        fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        // reserve capacity
+        std::vector<uint8_t> vec;
+        vec.reserve(fileSize);
+
+        // read the data:
+        vec.insert(vec.begin(),
+            std::istream_iterator<uint8_t>(file),
+            std::istream_iterator<uint8_t>());
+
+        return vec;
+    }
+
+    using MWLParser::Level;
+
+    class ByteConversionTest : public testing::TestWithParam<const char*>
+    {
+    protected:
+        void SetUp() override
         {
-            ++i;
+            auto path = std::filesystem::path(TEST_MWL_DIR);
+            path /= GetParam();
+            mwl_bytes = readFile(path.string().c_str());
+
+            level = std::make_unique<Level>(mwl_bytes);
+        }
+
+        std::unique_ptr<Level> level;
+        std::vector<uint8_t> mwl_bytes;
+    };
+
+    std::string getDifferenceString(const std::vector<uint8_t>& expected, const std::vector<uint8_t> actual, size_t padding = 0)
+    {
+        std::string output;
+
+        size_t line_idx = 0;
+        for (size_t i = 0; i != std::max(expected.size(), actual.size()) + padding; ++i)
+        {
+
+            if (i % 0x10 == 0)
+            {
+                output += fmt::format("{}{:03X}: ", i != 0 ? "\n" : "", line_idx);
+                ++line_idx;
+            }
+
+            if (i < padding)
+            {
+                output += " -- ";
+                continue;
+            }
+
+            size_t idx = i - padding;
+            char prefix = ' ';
+            uint8_t byte;
+
+            if (idx >= actual.size())
+            {
+                prefix = '-';
+                byte = expected.at(idx);
+            }
+            else if (idx >= expected.size())
+            {
+                prefix = '+';
+                byte = actual.at(idx);
+            }
+            else if (expected.at(idx) != actual.at(idx))
+            {
+                prefix = '~';
+                byte = actual.at(idx);
+            }
+            else
+            {
+                byte = expected.at(idx);
+            }
+
+            output += fmt::format("{}{:02X} ", prefix, byte);
+        }
+
+        return output;
+    }
+
+    TEST_P(ByteConversionTest, ConvertsHeaderCorrectly)
+    {
+        std::vector<uint8_t> expected{};
+        std::copy(mwl_bytes.begin(), mwl_bytes.begin() + 0x40, std::back_inserter(expected));
+
+        auto actual = level->header->toBytes();
+
+        if (expected != actual)
+        {
+            ADD_FAILURE() << "Re-converted header bytes differed from original header bytes:\n" <<
+                getDifferenceString(expected, actual);
         }
     }
+
+    TEST_P(ByteConversionTest, ConvertsPaletteDataCorrectly)
+    {
+        std::vector<uint8_t> expected{};
+        const auto iterators = level->data_pointers->getPaletteDataIterators();
+        // ignore the header since we're just zeroing it out cause we don't care about it
+        std::copy(iterators.first + PaletteData::HEADER_SIZE,
+            iterators.second, std::back_inserter(expected));
+
+        const auto bytes = level->palette_data->toBytes();
+        std::vector<uint8_t> actual;
+        // ignore the header here too
+        std::copy(bytes.begin() + PaletteData::HEADER_SIZE, bytes.end(),
+            std::back_inserter(actual));
+
+        if (expected != actual)
+        {
+            ADD_FAILURE() << "Re-converted palette data bytes differed from original palette data bytes:\n" <<
+                getDifferenceString(expected, actual, PaletteData::HEADER_SIZE);
+        }
+    }
+
+    TEST_P(ByteConversionTest, ConvertsExAnimationDataCorrectly)
+    {
+        std::vector<uint8_t> expected{};
+        const auto iterators = level->data_pointers->getExAnimationIterators();
+        std::copy(iterators.first, iterators.second, std::back_inserter(expected));
+
+        auto actual = level->exanimation_data->toBytes();
+
+        if (expected != actual)
+        {
+            ADD_FAILURE() << "Re-converted ExAnimation data bytes differed from original ExAnimation data bytes:\n" <<
+                getDifferenceString(expected, actual);
+        }
+    }
+
+    TEST_P(ByteConversionTest, ConvertsBypassInformationCorrectly)
+    {
+        std::vector<uint8_t> expected{};
+        const auto iterators = level->data_pointers->getBypassInformationIterators();
+        std::copy(iterators.first, iterators.second, std::back_inserter(expected));
+
+        auto actual = level->bypass_information->toBytes();
+
+        if (expected != actual)
+        {
+            ADD_FAILURE() << "Re-converted bypass information bytes differed from original bypass information bytes:\n" <<
+                getDifferenceString(expected, actual);
+        }
+    }
+
+    INSTANTIATE_TEST_CASE_P(MWLConversion, ByteConversionTest, ::testing::ValuesIn(test_mwls));
 }
-
-int main()
-{
-    const std::vector<uint8_t> mwl_bytes = readFile("test_mwls\\level 105.mwl");
-
-    Header header = Header(mwl_bytes);
-    std::cout << header.lunar_magic_version << std::endl << header.lunar_magic_version << std::endl;
-
-    DataPointers data_pointers = DataPointers(mwl_bytes);
-
-    showRange("Level Information", data_pointers.getLevelInformationIterators());
-    showRange("Layer 1 Data", data_pointers.getLayer1DataIterators());
-    showRange("Layer 2 Data", data_pointers.getLayer2DataIterators());
-    showRange("Sprite Data", data_pointers.getSpriteDataIterators());
-    showRange("Palette Data", data_pointers.getPaletteDataIterators());
-    showRange("Secondary Entrances", data_pointers.getSecondaryEntrancesIterators());
-    showRange("ExAnimation", data_pointers.getExAnimationIterators());
-    showRange("Bypass Information", data_pointers.getBypassInformationIterators());
-
-    const auto header_bytes = header.toBytes();
-    showRange("Re-converted", std::make_pair(header_bytes.begin(), header_bytes.end()));
-}
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

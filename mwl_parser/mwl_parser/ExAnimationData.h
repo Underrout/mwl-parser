@@ -13,14 +13,24 @@ namespace MWLParser
 {
 	using namespace MWLParser::Constants::ExAnimation;
 
-	struct ExAnimationData : public virtual Convertible
+	struct BaseExAnimationData : public virtual Convertible
 	{
 		bool enable_original_games_global_tile_animations;
 		bool enable_original_games_palette_animations;
 		bool enable_lunar_magics_global_animations;
 		bool enable_lunar_magics_level_animations;
 
-		AltGfx alternate_gfx_file;
+		BaseExAnimationData() = default;
+		BaseExAnimationData(const std::vector<uint8_t>& mwl_bytes);
+
+		std::vector<uint8_t> toBytes() const;
+
+		static std::shared_ptr<BaseExAnimationData> getExAnimationData(const std::vector<uint8_t>& mwl_bytes);
+	};
+
+	struct ExAnimationData : public BaseExAnimationData
+	{
+		AltGfx alternate_gfx_file{};
 
 		std::vector<CustomTriggerInitState> custom_trigger_initialization_settings{};
 		std::vector<std::optional<size_t>> manual_trigger_initialization_settings{};

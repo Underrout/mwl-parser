@@ -4,8 +4,10 @@
 using namespace MWLParser::Constants::ExAnimation;
 
 using MWLParser::ExAnimationData;
+using MWLParser::BaseExAnimationData;
+using MWLParser::Convertible;
 
-ExAnimationData::ExAnimationData(const std::vector<uint8_t>& mwl_bytes)
+BaseExAnimationData::BaseExAnimationData(const std::vector<uint8_t>& mwl_bytes)
 {
 	size_t animation_settings = joinBytes(mwl_bytes,
 		ANIMATION_SETTINGS_OFFSET,
@@ -16,7 +18,10 @@ ExAnimationData::ExAnimationData(const std::vector<uint8_t>& mwl_bytes)
 	enable_original_games_palette_animations = !(animation_settings & 0b10000000);
 	enable_lunar_magics_global_animations = !(animation_settings & 0b00100000);
 	enable_lunar_magics_level_animations = !(animation_settings & 0b00010000);
+}
 
+ExAnimationData::ExAnimationData(const std::vector<uint8_t>& mwl_bytes) : BaseExAnimationData(mwl_bytes)
+{
 	size_t slot_amount = joinBytes(mwl_bytes,
 		GENERAL_ANIMATION_HIGHEST_USED_SLOT_OFFSET,
 		GENERAL_ANIMATION_HIGHEST_USED_SLOT_SIZE
@@ -110,7 +115,7 @@ ExAnimationData::ExAnimationData(const std::vector<uint8_t>& mwl_bytes)
 	}
 }
 
-std::vector<uint8_t> ExAnimationData::toBytes() const
+std::vector<uint8_t> BaseExAnimationData::toBytes() const
 {
 	uint8_t first_header_byte = (!enable_original_games_global_tile_animations << 6) |
 		(!enable_original_games_palette_animations << 7) |
@@ -122,6 +127,25 @@ std::vector<uint8_t> ExAnimationData::toBytes() const
 	// zero out rest of the header, which is supposedly unused
 	bytes.insert(bytes.end(),
 		ANIMATION_HEADER_SIZE - ANIMATION_SETTINGS_SIZE, 0);
+
+	return bytes;
+}
+
+std::shared_ptr<BaseExAnimationData> BaseExAnimationData::getExAnimationData(const std::vector<uint8_t>& mwl_bytes)
+{
+	if (mwl_bytes.size() <= ANIMATION_HEADER_SIZE)
+	{
+		return std::make_shared<BaseExAnimationData>(mwl_bytes);
+	}
+	else
+	{
+		return std::make_shared<ExAnimationData>(mwl_bytes);
+	}
+}
+
+std::vector<uint8_t> ExAnimationData::toBytes() const
+{
+	auto bytes = BaseExAnimationData::toBytes();
 
 	const auto max_slot_plus_one = 
 		animation_slots.empty() ? 0 : animation_slots.rbegin()->first + 1;
