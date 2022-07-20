@@ -80,52 +80,61 @@ namespace Test
         std::vector<uint8_t> mwl_bytes;
     };
 
-    std::string getDifferenceString(const std::vector<uint8_t>& expected, const std::vector<uint8_t> actual, size_t padding = 0)
+    std::string getDifferenceString(const std::vector<uint8_t>& expected, 
+        const std::vector<uint8_t> actual, size_t padding = 0, size_t bytes_per_line = 0x8)
     {
-        std::string output;
+        std::string output{};
+
+        if (expected.size() != actual.size())
+        {
+            output += fmt::format("Actual size: {:#x}, expected size: {:#x}\n\n", actual.size(), expected.size());
+        }
 
         size_t line_idx = 0;
         for (size_t i = 0; i != std::max(expected.size(), actual.size()) + padding; ++i)
         {
 
-            if (i % 0x10 == 0)
+            if (i % 0x8 == 0)
             {
-                output += fmt::format("{}{:03X}: ", i != 0 ? "\n" : "", line_idx);
+                output += fmt::format("{}{:03X}: ", i != 0 ? "\n" : "", line_idx * bytes_per_line);
                 ++line_idx;
             }
 
             if (i < padding)
             {
-                output += " -- ";
+                output += "--     ";
                 continue;
             }
 
             size_t idx = i - padding;
-            char prefix = ' ';
-            uint8_t byte;
+            std::string expected_byte, actual_byte;
 
             if (idx >= actual.size())
             {
-                prefix = '-';
-                byte = expected.at(idx);
+                expected_byte = fmt::format("{:02X}", expected.at(idx));
+                actual_byte = "--";
             }
             else if (idx >= expected.size())
             {
-                prefix = '+';
-                byte = actual.at(idx);
+                expected_byte = "--";
+                actual_byte = fmt::format("{:02X}", actual.at(idx));
             }
             else if (expected.at(idx) != actual.at(idx))
             {
-                prefix = '~';
-                byte = actual.at(idx);
+                expected_byte = fmt::format("{:02X}", expected.at(idx));
+                actual_byte = fmt::format("{:02X}", actual.at(idx));
             }
             else
             {
-                byte = expected.at(idx);
+                expected_byte = fmt::format("{:02X}", expected.at(idx));
+                actual_byte = expected_byte;
             }
 
-            output += fmt::format("{}{:02X} ", prefix, byte);
+            output += fmt::format("{}{}  ", actual_byte, 
+                expected_byte != actual_byte ? '(' + expected_byte + ')' : "    ");
         }
+
+        output += "\n\nFormat: XX(YY), XX -> actual byte, YY -> expected byte";
 
         return output;
     }
@@ -139,7 +148,7 @@ namespace Test
 
         if (expected != actual)
         {
-            ADD_FAILURE() << "Re-converted header bytes differed from original header bytes:\n" <<
+            ADD_FAILURE() << "Re-converted header bytes differed from original header bytes:\n\n" <<
                 getDifferenceString(expected, actual);
         }
     }
@@ -160,7 +169,7 @@ namespace Test
 
         if (expected != actual)
         {
-            ADD_FAILURE() << "Re-converted palette data bytes differed from original palette data bytes:\n" <<
+            ADD_FAILURE() << "Re-converted palette data bytes differed from original palette data bytes:\n\n" <<
                 getDifferenceString(expected, actual, PaletteData::HEADER_SIZE);
         }
     }
@@ -175,7 +184,7 @@ namespace Test
 
         if (expected != actual)
         {
-            ADD_FAILURE() << "Re-converted ExAnimation data bytes differed from original ExAnimation data bytes:\n" <<
+            ADD_FAILURE() << "Re-converted ExAnimation data bytes differed from original ExAnimation data bytes:\n\n" <<
                 getDifferenceString(expected, actual);
         }
     }
@@ -190,7 +199,7 @@ namespace Test
 
         if (expected != actual)
         {
-            ADD_FAILURE() << "Re-converted bypass information bytes differed from original bypass information bytes:\n" <<
+            ADD_FAILURE() << "Re-converted bypass information bytes differed from original bypass information bytes:\n\n" <<
                 getDifferenceString(expected, actual);
         }
     }
