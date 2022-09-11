@@ -18,3 +18,5 @@ I'm getting most of my information about the format from these sources:
 
 - [MWL File Format](https://github.com/kaizoman666/SMW-Data/blob/master/Misc/MWL%20File%20Format.md)
 - [Level Data Format](https://smwspeedruns.com/index.php/Level_Data_Format)
+
+The solution uses Visual Studio 2022 and consists of a library and a test project.
